@@ -63,18 +63,99 @@ class Solver {
 		stack<node*> stackN; 
 		// flag to check if all the possible assignments have been explored in the state space
 		bool allExplored;
-		//Constructor to initialize vector of clauses and $nvar
+		// vector to hold all previously explored different assignments.
+		vector<map<int,bool> > prevAssigns;
+	
+	//Constructor to initialize vector of clauses and $nvar		
 	Solver (vector<Cloz*> vecCl, int numVars){
 		this -> vecCloz = vecCl;
 		nCloz = vecCl.size();
 		nVars = numVars;
 		root = new node(0,false);
-		setupTree(root);
-		initializeStack(root);
+		//Done when exploring state space from a tree
+		//setupTree(root);
+		//initializeStack(root);
+		srand (time(NULL));
 		allExplored = false;
 		      //Debug : cout << "N var is " << nVars << endl;
 		      //Debug : cout <<"Stack size at t0 is " << stackN.size() << endl;
 	}
+	/**
+	*  This method compares two assignments and returns true if they both are the same
+	**/
+	bool map_compare (map<int,bool> const &lhs, map<int,bool> const &rhs) {
+        return lhs.size() == rhs.size() && equal(lhs.begin(), lhs.end(), rhs.begin());
+    }
+    /**
+    * This method generates next Random assignment 
+    **/
+    void getNextAssignmentRandom(){
+		int i;
+		int r;
+		map<int,bool> assign ;
+		r = ( rand() % nVars + 1) ;
+		assignment[r] = !assignment[r];
+		return ;
+	}
+	/**
+	* Attempts to find the solution by exploring random assignments
+	**/
+	void solveRandom (){
+		time_t start ;
+		time_t end;
+		int prevSize ;
+		int i;
+		bool rotate = false;
+		int totalPossibleAssignments = pow(2,nVars);
+		start = time(NULL) ;
+		int counter = 0;
+		while(end - start < 10){
+			 end = time(NULL);
+			 rotate = false;
+			 getNextAssignmentRandom();
+			 //check to see UNSAT 
+			 prevSize = prevAssigns.size();
+			 if(prevSize == totalPossibleAssignments){
+			 	cout << "Number of explored Assignments " << prevAssigns.size() << endl;
+			 	double ratio = (double)prevAssigns.size()/totalPossibleAssignments;
+				cout << "Ratio " << ratio <<endl;
+			 	cout << "UNSAT \n";
+			 	return;
+			 }
+			for(i=0;i<prevSize;i++){
+				
+				if(map_compare(prevAssigns[i], assignment)){
+					rotate = true;
+					break;
+				}
+			}
+				
+			if(rotate){
+				continue;
+			}
+			else{
+				if(evalExpr()){
+					//Debug : printAssign();
+					cout << "Number of explored Assignments " << prevAssigns.size() << endl;
+					double ratio = (double)prevAssigns.size()/totalPossibleAssignments;
+				    cout << "Ratio " << ratio <<endl;
+					cout << "SAT \n";
+					return;
+				}
+				
+				prevAssigns.push_back(assignment);
+			}
+			counter++;
+		 }
+		
+		int x = prevAssigns.size();
+		cout << "Number of explored Assignments " << x << endl;
+		double ratio = (double)x/totalPossibleAssignments;
+		cout << "Ratio " << ratio <<endl;
+		cout << "UNKNOWN \n";
+	    return;
+	}
+	
 	/** 
 	* Initialize stack with assignment to zero of all the variables. This is done by traversing the tree left from root to leaf.
 	**/
