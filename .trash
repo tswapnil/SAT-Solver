@@ -1,0 +1,82 @@
+ bool map_compare (map<int,bool> const &lhs, map<int,bool> const &rhs) {
+    return lhs.size() == rhs.size() && equal(lhs.begin(), lhs.end(), rhs.begin());
+    }
+	map<int,bool> getNextAssignmentRandom(){
+		int i;
+		double r;
+		map<int,bool> assign ;
+			srand (time(NULL));
+		for(i=0;i<nVars;i++){
+			r = ((double) rand() / (RAND_MAX));
+			cout << "r value is " <<r <<endl;
+			if(r>0.5){
+				(assign)[i+1]=true;
+			}
+			else{
+				(assign)[i+1]=false;
+			}
+		}
+		
+		return assign;
+	}
+	
+	// Adding count of explored vars needed
+	void solveRandom (){
+		cout<< "Inside Solve \n";
+		time_t start ;
+		time_t end;
+		map<int,bool> tAssign;
+		int prevSize ;
+		int i;
+		bool rotate = false;
+		int totalPossibleAssignments = pow(2,nVars);
+		cout << "totalPossibleAssignments " <<totalPossibleAssignments << endl;
+		start = time(NULL) ;
+		cout << "Time started at " << start << endl;
+		int counter = 0;
+		while(end - start < 10){
+			 end = time(NULL);
+			rotate = false;
+			 
+			 tAssign = getNextAssignmentRandom();
+			 cout << ((tAssign).empty()) << endl;
+		
+			 //check to see UNSAT 
+			 prevSize = prevAssigns.size();
+			 if(prevSize == totalPossibleAssignments){
+			 	cout << "UNSAT";
+			 	return;
+			 }
+			for(i=0;i<prevSize;i++){
+				
+				if(map_compare(prevAssigns[i], tAssign)){
+					cout << "Rotate gets true \n";
+					rotate = true;
+					break;
+				}
+			}
+				
+			if(rotate){
+				continue;
+			}
+			else{
+				this -> assignment = tAssign;
+				if(evalExpr()){
+					cout << "SAT";
+					return;
+				}
+				
+				prevAssigns.push_back(tAssign);
+			}
+			cout << "Loop counter " << counter++ <<endl;
+		 	
+		  cout << "End " << end << "\n";
+		  cout << "End - start" << (end-start)<< "\n";
+		}
+		
+		cout << "Time ended at " << end << endl;
+		int x = prevAssigns.size();
+		cout << "Number of explored Assignments " << x << endl;
+	    return;
+	}
+	
