@@ -106,7 +106,7 @@ class Solver {
 		int prevSize ;
 		int i;
 		bool rotate = false;
-		int totalPossibleAssignments = pow(2,nVars);
+		double totalPossibleAssignments = pow(2,nVars);
 		start = time(NULL) ;
 		int counter = 0;
 		while(end - start < 10){
@@ -116,9 +116,9 @@ class Solver {
 			 //check to see UNSAT 
 			 prevSize = prevAssigns.size();
 			 if(prevSize == totalPossibleAssignments){
-			 	cout << "Number of explored Assignments " << prevAssigns.size() << endl;
-			 	double ratio = (double)prevAssigns.size()/totalPossibleAssignments;
-				cout << "Ratio " << ratio <<endl;
+			 	//Debug :cout << "Number of explored Assignments " << prevAssigns.size() << endl;
+			 	//Debug : double ratio = (double)prevAssigns.size()/totalPossibleAssignments;
+				//Debug : cout << "Ratio " << ratio <<endl;
 			 	cout << "UNSAT \n";
 			 	return;
 			 }
@@ -136,9 +136,9 @@ class Solver {
 			else{
 				if(evalExpr()){
 					//Debug : printAssign();
-					cout << "Number of explored Assignments " << prevAssigns.size() << endl;
-					double ratio = (double)prevAssigns.size()/totalPossibleAssignments;
-				    cout << "Ratio " << ratio <<endl;
+					//Debug: cout << "Number of explored Assignments " << prevAssigns.size() << endl;
+					//Debug : double ratio = (double)prevAssigns.size()/totalPossibleAssignments;
+				    //Debug : cout << "Ratio " << ratio <<endl;
 					cout << "SAT \n";
 					return;
 				}
@@ -150,6 +150,7 @@ class Solver {
 		
 		int x = prevAssigns.size();
 		cout << "Number of explored Assignments " << x << endl;
+		cout << "Total Possible Assignments " << totalPossibleAssignments <<endl;
 		double ratio = (double)x/totalPossibleAssignments;
 		cout << "Ratio " << ratio <<endl;
 		cout << "UNKNOWN \n";

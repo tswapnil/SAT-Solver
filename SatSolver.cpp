@@ -27,7 +27,8 @@ vector<string> split(string str,string sep){
 * Parses the file and reads the clauses line by line and runs the SAT Solver
 **/
 int main(){
-	ifstream infile("C:\\study\\4th quarter\\sat solver\\resource\\dimacs0.sat");
+	string filePath = "C:\\study\\4th quarter\\sat solver\\resource\\dimacs1.sat";
+	ifstream infile(filePath.c_str());
     string line;
     int nvar = 0;
     int ncloz = 0;
