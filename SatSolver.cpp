@@ -5,7 +5,8 @@
 #include <vector>
 #include <string.h>
 #include <cstdlib>
-#include "Solver.h"
+//#include "Solver.h"
+#include "DPLL.h"
 
 using namespace std;
 /**
@@ -20,6 +21,7 @@ vector<string> split(string str,string sep){
         arr.push_back(current);
         current=strtok(NULL,sep.c_str());
     }
+    
     return arr;
 }
 
@@ -27,7 +29,7 @@ vector<string> split(string str,string sep){
 * Parses the file and reads the clauses line by line and runs the SAT Solver
 **/
 int main(){
-	string filePath = "C:\\study\\4th quarter\\sat solver\\resource\\dimacs1.sat";
+	string filePath = "C:\\study\\4th quarter\\cse 291 E\\petite\\sat-benchmarks-master\\petite\\total-order-alt-19.cnf";
 	ifstream infile(filePath.c_str());
     string line;
     int nvar = 0;
@@ -68,10 +70,14 @@ if(type != "cnf" && type != "CNF"){
     exit(-1);
 }
 
-Solver* solver = new Solver(vecClozes,nvar);
-solver -> solveRandom();
-
 infile.close();
+//Solver* solver = new Solver(vecClozes,nvar);
+//solver -> solveRandom();
+
+DPLLSolver* solver = new DPLLSolver(vecClozes,nvar);
+solver->solveDPLL(); 
+
+
  
 //Debug : cout << nvar << " variables and " << ncloz << " clauses " << endl; 
 

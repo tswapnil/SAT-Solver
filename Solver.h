@@ -135,7 +135,7 @@ class Solver {
 			}
 			else{
 				if(evalExpr()){
-					//Debug : printAssign();
+					Debug : printAssign();
 					//Debug: cout << "Number of explored Assignments " << prevAssigns.size() << endl;
 					//Debug : double ratio = (double)prevAssigns.size()/totalPossibleAssignments;
 				    //Debug : cout << "Ratio " << ratio <<endl;

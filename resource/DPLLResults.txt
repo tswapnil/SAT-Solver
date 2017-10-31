@@ -1,0 +1,104 @@
+Results -
+graph-ordering file number -
+2 --- UNSAT
+3 --- UNSAT
+4 --- UNSAT
+5 --- UNSAT
+6 --- UNSAT
+7 --- UNSAT 
+8 --- UNSAT
+9 --- UNSAT
+10 --- UNSAT
+11 --- UNSAT
+12 --- TIMEOUT
+13 --- UNSAT
+14 --- TIMEOUT
+15 --- TIMEOUT
+---
+16 --- TIMEOUT
+17 --- TIMEOUT
+18 --- TIMEOUT
+19 --- TIMEOUT
+
+
+graph-ordering-alt file number -
+2 --- SAT
+3 --- SAT
+4 --- SAT
+5 --- SAT
+6 --- SAT
+7 --- SAT 
+8 --- SAT
+9 --- SAT
+10 --- SAT
+11 --- SAT
+12 --- SAT
+13 --- SAT
+14 --- SAT
+15 --- SAT
+16 --- SAT
+17 --- SAT
+18 --- SAT
+19 --- SAT
+
+order-principle-alt 
+
+2 --- SAT
+3 --- SAT
+4 --- SAT
+5 --- SAT
+6 --- SAT
+7 --- SAT 
+8 --- SAT
+9 --- SAT
+10 --- SAT
+11 --- SAT
+12 --- SAT
+13 --- SAT
+14 --- SAT
+15 --- SAT
+16 --- SAT
+17 --- SAT
+18 --- SAT
+19 --- SAT
+
+total-order 
+2 --- UNSAT
+3 --- UNSAT
+4 --- UNSAT
+5 --- UNSAT
+6 --- UNSAT
+7 --- UNSAT 
+8 --- UNSAT
+9 --- UNSAT
+10 --- UNSAT
+11 --- UNSAT
+12 --- UNSAT
+13 --- UNSAT
+14 --- TIMEOUT
+15 --- TIMEOUT
+16 --- TIMEOUT
+17 --- TIMEOUT
+18 --- TIMEOUT
+19 --- TIMEOUT
+
+total-order-alt
+2 --- SAT
+3 --- SAT
+4 --- SAT
+5 --- SAT
+6 --- SAT
+7 --- SAT 
+8 --- SAT
+9 --- SAT
+10 --- SAT
+11 --- SAT
+12 --- SAT
+13 --- SAT
+14 --- SAT
+15 --- SAT
+16 --- SAT
+17 --- SAT
+18 --- SAT
+19 --- SAT
+

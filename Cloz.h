@@ -16,9 +16,16 @@ class Cloz {
 	int nLit;
     // stores the literals in a clause
 	vector<string> vecLit;
+	//boolean that is true if cloz is conflict. else false;
+	bool isConflict;
 	Cloz (vector<string> v){
 		this->vecLit = v;
-		nLit = this->vecLit.size();	
+		nLit = this->vecLit.size();
+		isConflict = false;	
+	}
+	
+	Cloz(bool val){
+		isConflict = val;
 	}
 	/**
 	* Method to print the clause
