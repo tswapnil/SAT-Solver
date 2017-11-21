@@ -1,11 +1,21 @@
 "# sat-solver-tswapnil" 
+---- Conflict Analysis ----
+SatSolver.cpp has the main() method to run the SAT Solver. 
+CDCL.h has the complete implementation of conflict Analysis.
+The code stops at the first conflict. or returns SAT if without any conflict it finds an assignment. 
+compile SatSolver.cpp, CDCL.h , and Cloz.h .
+
+Specify the file path in the string filePath and run SatSolver.cpp
+The results of petite benchmarks are mentioned in the file DPLLResults.txt (./resource/CDCLResults.txt)
+
+
 ----DPLL Below -------------------------
 SatSolver.cpp has the main() method to run the SAT Solver. 
 DPLL.h has the complete implementation of DPLL algo. 
 compile SatSolver.cpp, DPLL.h , and Cloz.h .
 
 Specify the file path in the string filePath and run SatSolver.cpp
-The results of petite benchmarks are mentioned in the file DPLLResults.txt (~/resource/DPLLResults.txt)
+The results of petite benchmarks are mentioned in the file DPLLResults.txt (./resource/DPLLResults.txt)
 
 
 --------Random assignment below --------
