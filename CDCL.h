@@ -19,7 +19,7 @@ class CDCLSolver {
 		int nVars;
 		//vector of clauses - from the file
 		vector<Cloz*> vecCloz;
-		// the assignment of variables to be evaluated on. 
+		// the assignment of variables to be evaluated on
 		map<int,bool> assignment;
 		//the assignment decision level
 		map<int,int> assignLevel;
@@ -56,6 +56,7 @@ class CDCLSolver {
 		pureLiterals();
 		d = 0;
 		decToBacktrack = 0;
+		learnedCloz = NULL;
 		//G = new Graph(NULL,NULL);
         //Debug
      /*   cout << "Singleton clauses in gamma\n";
@@ -227,15 +228,18 @@ class CDCLSolver {
 	*  otherwise returns 0;
 	*/
 	int isUnitClause(Cloz* cloz){
-	//	cout << "Inside unitcloz";
+		cout << "IUC : Inside unitcloz \n";
 		int x = 0;
 		// count is number of un-assigned variables
 		int count = 0;
 		int retLit = 0;
 		// Assume all literals are assigned in the cloz and set it to false if find any literal not assigned.
 		bool litAssigned = true;
+		cloz->printCloz();
+		cout << "IUC : isConflict var ? " << cloz->isConflict << endl;
 		for(int i=0;i<cloz->nLit - 1; i++){
 			int lit = atoi((cloz->vecLit[i]).c_str());
+			cout << "IUC: For checking if all elements assigned ? Checking lit  " << lit << "\n";
 			if(lit<0){
 				lit = -1*lit;
 			}
@@ -254,6 +258,8 @@ class CDCLSolver {
 			if(!evalRes){
 				cout << "Found conflict \n";
 				//CONFLICT
+				cout << "Conflict cloz at level "<< d << " is \n" ;
+				cloz->printCloz();
 				assignment[-1] = true;
 				assignLevel[-1] = d;
 				//Add the conflict node to the graph
@@ -263,6 +269,7 @@ class CDCLSolver {
 					if(lit==0){
 						continue;
 					}
+					
 					int mapKey = lit;
 					if(lit<0){
 						mapKey = -1*lit;
@@ -380,12 +387,13 @@ class CDCLSolver {
 				return;
 			}
 			else{
-		//		cout << "Picked Clause \n" ;
-		//		unitCloz -> printCloz(); 
+				cout << " Unit : Picked Clause \n" ;
+				unitCloz -> printCloz(); 
 				// Find the literal in the unit clause and make assignment
 				int maxDecisionLevel = 0; 
 				int unassignedLit = 0;
 				vector<Node*> vecNode;
+				cout << " Unit : Iterating over literals of unitcloz \n";
 				for(int i=0;i<unitCloz->nLit - 1; i++){
 					int lit = atoi((unitCloz->vecLit[i]).c_str());
 					if(lit==0){
@@ -397,42 +405,62 @@ class CDCLSolver {
 						
 					}
 					if(assignment.count(mapKey)>0){
+					   cout << " Unit : lit " << mapKey << " is assigned to " << assignment[mapKey] << " at decision level " << assignLevel[mapKey] << endl; 
 					  int tempD = assignLevel[mapKey];
 					  if(tempD > maxDecisionLevel){
 					  	maxDecisionLevel = tempD;
 					  }
+					  cout << "Unit : getting the above lit " << mapKey << " and its node value from litToNode \n";
 					  Node* tempNode = litToNode[mapKey];
-					  
+					  cout << " Unit : the node value is NULL ? " << (tempNode == NULL) << endl;
 					  vecNode.push_back(tempNode);
 					  
 					}
 					else{
-		//				cout << "Assigning value for lit " << lit <<endl;
+						cout << " Unit : The  " << lit << " is unassigned" <<endl;
 						unassignedLit = mapKey;
 						assignment[mapKey] = lit < 0 ? false : true;
-					
+					 cout << "Unit : assigning " << mapKey << " " << assignment[mapKey] << endl;
 	                    Node* mapKeyNode = new Node(d,mapKey,assignment[mapKey]);
 						litToNode[mapKey] = mapKeyNode;
+						cout << " Unit : created a new node for this unassigned lit " << mapKey <<" and put in litToNode\n";
+						cout << " Unit : Need to put the current unassigned node in decVec[topNode] and hence check if delStack is empty ? " << (delStack.empty()) << endl;
 					    if(!delStack.empty()) {
 					        Node* topNode = delStack.top();
+					        cout << "Unit : topNode lit on delStack is " << topNode->lit <<" and topNode level for decVec is" << topNode->dLevel << endl; 
 					        decVec[topNode].push_back(mapKeyNode);
+					        cout << " Unit : Pushed the unassigned node on decVec[topNode] \n";
 					     }
 					else{
-					//	cout << "Stack is empty ,\n"; 
+					    	cout << "Unit : Stack is empty and hence can't assign the decVec[topNode] . This is for lit " << mapKey<< " \n"; 
 					} 
 					
 						addClauseToGamma(lit);
+						cout << "Unit : Added clause to gamma for lit " << lit << " \n" ; 
 					}
 				}
 				//Make sure unassignedLit and maxDeicisionbLevel are well formed
 				assignLevel[unassignedLit] = maxDecisionLevel;
+				cout << "Unit : assignLevel of lit " << unassignedLit << " is " << maxDecisionLevel << endl;
+				//debug
+				//cout << "unit level : lit " << unassignedLit << " at level " << maxDecisionLevel << endl; 
 			    Node* tempNode = litToNode[unassignedLit];
 			    tempNode->adjacentFrom = vecNode;
+			    cout << "Unit : unassigned lit " << tempNode->lit << " is adjacentFrom " << vecNode.size() << " nodes \n";
 			    // For each node in vecNode , we also have to assign adjacentTo
+			    cout << "Unit : Checking adjacentTo behavior \n";
 			    for(int i=0;i<vecNode.size();i++){
 			    	Node* node = vecNode[i];
+			    	cout << "Unit : current node is " << node->lit << " and the size of adjacenTo before adding is " << (node->adjacentTo).size() << endl;
                     (node->adjacentTo).push_back(tempNode);
+                    //Debug code in this block below -- 
+                    vector<Node*> adjTo = node->adjacentTo;
+                    cout << "Unit : current node " << node->lit << " has the following nodes in adjacentTo after adding unassgined to it. \n"; 
+					for(int i=0;i<adjTo.size();i++){
+                    	cout << "Unit: adj[i] is " << adjTo[i]->lit << endl;
+					}
 				}
+				cout << "Unit : Unit Prop ends for decision level " << d;
 			}
 		}
 	}
@@ -442,27 +470,114 @@ class CDCLSolver {
 	*/	
 	void makeDecision(){
 		//increment the decision level
-		
+		printAssign();
 		d++;
-		cout << "Making decision at level " << d << endl;
+		cout << "MD : Making decision at level " << d << endl;
 		int lit = 0;
-	
-		for(int i=0;i<nVars;i++){
-			if(assignment.count(i+1)==0){
-				//make decision
-				assignment[i+1] = 1;
-				assignLevel[i+1] = d;
-				lit = i+1;
-				break;
-			}
+	    //Make Decision based on learned cloz 
+	    //cout << (learnedCloz == NULL) << endl;
+	    bool assignedBasedOnLC = false;
+	    if(learnedCloz != NULL){
+	    	cout << "MD : making decision from learned clause" << endl;
+	    	for(int i=0;i<learnedCloz->nLit-1; i++){
+					int lit_t = atoi((learnedCloz->vecLit[i]).c_str());
+	    	         int mapKey = lit_t;
+					 if(lit_t<0){
+	    	         	mapKey = -1*lit_t;
+					 }
+					 if(assignment.count(mapKey)==0){
+					 	cout << "MD : lit " << mapKey << " is not assigned in learned cloz. \n";
+					 	assignment[mapKey] = lit_t<0?false:true;
+					 	assignLevel[mapKey] = d;
+					 	cout << "MD : added assignment and assignLevel (lit at the end), remains to add in LitToNode. Making assignment for lit " << mapKey << " = " << assignment[mapKey]<<endl;
+					    //lit = lit_t;
+					    assignedBasedOnLC = true;
+					    lit = mapKey;
+						break;
+					 }
+	            }
+		
+		
 		}
-	//	cout << "Making decision for " << lit << endl;
-	       
-	    Node* node = new Node(d,lit,1);
+	    else{
+		
+	    // Find the literal that is not assigned
+	     cout << "MD : Making decision since no learnedCloz"  << endl;
+		    for(int i=0;i<nVars;i++){
+			    if(assignment.count(i+1)==0){
+				//make decision
+				   assignment[i+1] = 1;
+				   assignLevel[i+1] = d;
+				   cout << "MD : Made assignment (assignment and assignLevel. litToNode left) for lit " << i+1 << " = " << assignment[i+1]<<endl;
+					    
+				   lit = i+1;
+				   break;
+			    }
+		    }
+		
+	    }   
+	    // if all the literals in leranedCloz are assigned , we will make learnedCloz as NULL so that next time while making decision decision is made in order 
+	    if(learnedCloz!=NULL){
+		cout << "MD : learnedCloz is not null. So here we check if all the literals in it have been assigned . \n";
+		int countOfUnLit = 0;
+		cout << "MD : Learned cloz is \n";
+		learnedCloz->printCloz();
+	    for(int i=0;i<learnedCloz->nLit-1; i++){
+					int lit_t = atoi((learnedCloz->vecLit[i]).c_str());
+					cout << "MD: Processing current lit of Learned Cloz " << lit_t << endl;
+					if(lit_t ==0){
+						continue;
+					}
+	    	         int mapKey = lit_t;
+					 if(lit_t<0){
+	    	         	mapKey = -1*lit_t;
+					 }
+					 if(assignment.count(mapKey)==0){
+					    countOfUnLit++;
+					 }
+				}
+		if(countOfUnLit==0){
+			//ALL assigned in learned Cloz ;
+			//delete learnedCloz;
+			learnedCloz = NULL;
+			cout << "MD: All literals have been assigned in learned cloz and therefor delted learnedCloz node and assigned it NULL\n";
+			cout << "MD: All literals have been assigned in learned cloz and therefore before we intialize a node we must find the right lit\n";
+			
+			
+			// Find the literal that is not assigned
+			if(!assignedBasedOnLC){
+			
+			
+	     cout << "MD : Making decision normally since all lits in learnedCloz assigned"  << endl;
+		    for(int i=0;i<nVars;i++){
+			    if(assignment.count(i+1)==0){
+				//make decision
+				   assignment[i+1] = true;
+				   assignLevel[i+1] = d;
+				   cout << "MD : Made assignment (assignment and assignLevel. litToNode left) for lit " << i+1 << " = " << assignment[i+1]<<endl;
+					    
+				   lit = i+1;
+				   break;
+			      }
+		       }
+		    }
+		}
+		
+       }
+	    // Create the node for the current decision made and update litToNode Mapping and also update our decision stack .    
+	    cout << " MD: Finally creating node for lit " << lit << " This should not be zero. It should be assigned to value  "<< assignment[lit]<< "\n"; 
+	    Node* node = new Node(d,lit,(bool)assignment[lit]);
+	    cout << "MD : Node stored has lit " << node->lit << " And value assigned to it is " << (bool)(node->assigned )<< endl;
 	    litToNode[lit] = node;
 		delStack.push(node);
+		cout << "MD : pushed node on litToNode and delStack \n";
+		vector<Node*> temp;
+		decVec[node] = temp;
+		cout << "MD : Also added an empty vector<node> in decVec[node]\n";
 		//decList.push(lit);
 		addClauseToGamma(lit);
+		
+    	cout << "MD : Added Clause to Gamma . Make Decision over" << endl;
 	}
 	/*Checks if all literals have been assigned*/
 	bool allAssigned(){
@@ -474,15 +589,160 @@ class CDCLSolver {
 		return true; 
 	}
 	
+	void delGraphWithBFS(Node* node){
+		queue<Node*> q;
+		Node* cur ;
+		q.push(node);
+		set<Node*> setQ;
+		//decision level of conflict
+		while(!q.empty()){
+			
+			 cur = q.front();
+			 q.pop();
+			 setQ.insert(cur);
+			 for(int i=0; i < (cur->adjacentTo).size();i++){
+			 	q.push((cur->adjacentTo)[i]);
+			 	
+			 //	((cur->adjacentFrom)[i]->adjacentTo).erase(std::remove(((cur->adjacentFrom)[i]->adjacentTo).begin(), ((cur->adjacentFrom)[i]->adjacentTo).end(), cur), ((cur->adjacentFrom)[i]->adjacentTo).end());
+			 }
+			 
+		    // delete cur;
+			// cur = NULL;	
+		}
+		set<Node*>::iterator it;
+			for (it=setQ.begin(); it!=setQ.end(); ++it)
+        {
+        
+		    delete (*it);
+	    }
+		
+		
+		
+	}
 	
+	void traverseDFS(Node* node){
+		if(node == NULL){
+			return;
+		}
+		cout << " Node lit is -> " << node->lit << endl;
+		vector<Node*> vec = node->adjacentTo;
+		for(int i=0;i<vec.size();i++){
+			traverseDFS(vec[i]);
+		}
+	}
+	
+	
+	void delGraphAt(Node* node){
+		if(node == NULL){
+           
+			return;
+		}
+		cout << "Del : calling del on lit " << node->lit << endl;
+		if(assignment.count(node->lit))
+		assignment.erase(assignment.find(node->lit));
+		//vector<Node*> tVec = node->adjacentTo;
+		cout << "Del : Deleting vector of size " << (node->adjacentTo).size() << "\n";
+		//for(int i=0;i<tVec.size();i++){
+		//	delGraphAt(tVec[i]);
+		//}
+		for(int i=0;i<(node->adjacentTo).size();i++){
+			cout << (node->adjacentTo)[i]->lit <<"\n";
+			
+		}
+		for(int i=0;i<(node->adjacentTo).size();i++){
+			delGraphAt((node->adjacentTo)[i]);
+			
+		}
+		cout << "Del : About time to delete node lit " << node->lit  << endl;
+		//remove every reference of node from its adjacent from . 
+		//vector<Node*> adjFrom = node->adjacentFrom;
+		//for(int i=0;i<adjFrom.size();i++){
+			
+		//	(adjFrom[i]->adjacentTo).erase(std::remove((adjFrom[i]->adjacentTo).begin(), (adjFrom[i]->adjacentTo).end(), node), (adjFrom[i]->adjacentTo).end());
+			//().erase((adjFrom[i]->adjacentTo).find(node));
+		//	cout << "Del: removed node " << node->lit << " from " << adjFrom[i]->lit << endl;
+		//}
+        for(int i=0;i<(node->adjacentFrom).size();i++){
+			
+			((node->adjacentFrom)[i]->adjacentTo).erase(std::remove(((node->adjacentFrom)[i]->adjacentTo).begin(), ((node->adjacentFrom)[i]->adjacentTo).end(), node), ((node->adjacentFrom)[i]->adjacentTo).end());
+			//().erase((adjFrom[i]->adjacentTo).find(node));
+			cout << "Del: removed node " << node->lit << " from " << (node->adjacentFrom)[i]->lit << endl;
+		}
+        
+		delete node;
+		node = NULL;
+		
+		cout << "Del: deleted node . Exit delGraph " << endl;
+		
+	}
+	
+	/*Backtrack procedure*/
 	void backtrack(){
+		
 		//remove conflict
+		cout << "BT: Backtracking check if conflict is there assignment.count(-1)  "<<assignment.count(-1) << " remove if true \n";
 		if(assignment.count(-1)>0){
 			assignment.erase(assignment.find(-1));
+			litToNode.erase(litToNode.find(-1));
+			
 		}
+	
+		cout << "BT: is delStack empty ? " << delStack.empty() << " if not empty run while loop (pop each element until decToBacktrack comes) \n";
+		while(!delStack.empty()){
+			//get top node 
 		Node* litNode = delStack.top();
+		cout << "BT : Got the top node from stack having lit " << litNode->lit << " \n";
+		// remove all nodes from decVec for litNode .
+		int curLevel = litNode->dLevel; 
+		cout << "BT : Current Node on top has level " << curLevel << endl;
+	
+		
+		cout << "BT : DecVec check for the current lit "<<litNode->lit<< " .  decVec has litNode ?" << decVec.count(litNode) << endl;
+		if(decVec.count(litNode))
+		 {
+		 	 for(int i=0;i<decVec[litNode].size();i++){
+		 	 	int lit = (decVec[litNode])[i]->lit;
+		 	 	assignment.erase(assignment.find(lit));
+		 	 	cout << "BT: deleting assignment based on DecVec for " << lit << endl;
+			  }
+		     decVec.erase(decVec.find(litNode));
+		     cout << "BT: deleting the current lit " << litNode->lit << " from decVec \n";
+	    }
 		int lit = litNode->lit;
+		
+		cout << "BT : litToNode has lit" << lit << "? " << litToNode.count(lit) << endl;
+		//remove from litToNode
+		litToNode.erase(litToNode.find(lit));
+		cout << "BT : Removed from litToNode \n";
+		cout << "BT : assignLevel has lit" << lit << "? " << assignLevel.count(lit) << endl;
+		//remove from assignLevel 
+		assignLevel.erase(assignLevel.find(lit));
+		cout << "BT : Removed from assignLevel \n";
+		assignment.erase(assignment.find(lit));
+		cout << "BT: Remove from assignment \n";
+		
+		
+		//traverseDFS(litNode);
+		//delGraphAt(litNode);
+	 	//delGraphWithBFS(litNode);
+		if (lit < 0){
+			lit = -1*lit;
+		}
+		//cout << " Current lit is " << lit << endl;
+		
 		delStack.pop();
+		d--;
+		cout << "BT : removed lit "<< lit << " from delStack and decremented decision level to " << d << " \n";
+			
+		if(curLevel == decToBacktrack){
+			cout << " current Level " <<  curLevel << "is equal to decToBacktrack . While loop must end now. \n";
+		   break;	
+		}
+	}
+		
+			//delete globConflict;
+		globConflict = NULL;
+	    cout << "BT: Made globConflict NULL. Did not delete. Assumption. will be deleted later in delGraph \n";
 		
 	    // ToDO : remove litToNode[lit] nodes from graph
 	    // delete assignments from data structures. also remove corresponding stacks and revert to second highest decision level and next step should be to make decisions based on learned cloz.
@@ -490,34 +750,19 @@ class CDCLSolver {
 		
 		//Delete all assignments made after making decision
 	
-	/*	while(decList.top()!=lit){
-			int elem = decList.top();
-	 	if(assignment.count(elem)){
-	 		assignment.erase(assignment.find(elem));
-		 }
-			cout << " removing lit " << elem << " from assignment" << endl;
-			decList.pop();
-		}
-		decList.pop();
-		cout << "Size of decList after backtrack is " <<decList.size() <<endl; 
-	  */  
-	   
-	    /*for(int i=0;decVec[lit].size();i++){
-	    	int elem = decVec[lit][i];
-	    	if(elem == 0){
-			  break;	
-			}
-			if(assignment.count(elem))
-	    	  assignment.erase(assignment.find(elem));
-	//		cout << " removing lit " << elem << " from assignment" << endl;
-			
-		}*/
-		
-	//	cout << "All removed \n";
-		//decVec.erase(decVec.find(lit));
-	//	cout << "removed " << lit << " from decVec\n" ; 
-//		cout << "decvec has lit" << lit << "  " << decVec.count(lit) << endl;
-	
+    cout << "BT: Should also update gamma accordingly. Best is to choose all clauses having assigned literals in assignment" << endl;
+    gamma.clear();
+    map<int, bool>::iterator it;
+    for ( it = assignment.begin(); it != assignment.end(); it++ )
+    {
+        int key = it->first;  // string (key)
+          if(key!=-1){
+          	cout << "BT : Adding Clause to gamma for lit " << key << endl;
+             addClauseToGamma(key);      	
+		  }      
+     }
+    
+	cout << "BT: Exit Backtrack \n";
 
 	}
 	
@@ -535,31 +780,37 @@ class CDCLSolver {
 	* Updates the learned clause global variable. Also finds second highest decision level. 
 	*/
 	void learnClause(queue<Node*> q){
-		//cout << "learn cloz \n"; 
+		cout << "LC: learn cloz \n"; 
 		set<Node*> setQ;
 		set<Node*>::iterator it;
 		Node* cur;
+		cout << "LC : Size of queue to learn clause from " << q.size() << endl;
 		while(!q.empty()){
 			cur = q.front();
+			cout << " LC : Before inserting in it . current lit is " << cur->lit << " and assigned value is " << cur->assigned << endl;
 			q.pop();
 			setQ.insert(cur);
 		}
-		//cout << "check 1 \n";
+		cout << "LC: inserted all queue elements to set . size of set is " <<setQ.size()<< "\n";
 	   	int count = 0;
 	   	vector<string> vecLiterals;
 	   	int cLevel = globConflict->dLevel;
+	   	cout << "LC: Conflict at level " << cLevel << endl;
 	   	int maxSecond = -1;
+	   	int setSize = setQ.size();
 		for (it=setQ.begin(); it!=setQ.end(); ++it){
           //  cout << "check 2 \n";
 			cur = *it;
 		    int lit = cur->lit;
 		    bool assigned = cur->assigned;
 		    int dLevel = cur->dLevel;
+		    cout << "LC: Set iter -- Current lit " << lit << " is at level " << dLevel <<  " and assigned to " << assigned << endl;
 		    // Checks dLevel only when it is not the max level at conflict. Finds the maximum among the remaining. 
 		    if(dLevel!=cLevel){
-		    	if(maxSecond> dLevel){
+		    	if(maxSecond < dLevel){
 		    		maxSecond = dLevel;
 				}
+				count++;
 			}
 		    
 		    if(assigned){
@@ -577,49 +828,104 @@ class CDCLSolver {
 			   vecLiterals.push_back(str);
 			}
 		}
-		
-		decToBacktrack = maxSecond;
+		std::string charEnd = "0";
+		vecLiterals.push_back(charEnd);
+		// either count == 0 or setSize == 1
+		if(count == 0){
+			int tDLevel = cur->dLevel;
+			if(tDLevel == 1){
+				decToBacktrack = -1;
+			}
+			else
+		        decToBacktrack = 0;
+		}
+		else
+		    decToBacktrack = maxSecond;
 		learnedCloz = new Cloz(vecLiterals);
+		cout <<"LC : Exit LC with size of learned literals " << vecLiterals.size() << endl;
 	}
 	
 	/*
-	*  Iterates over queue and checks if the cLevel is exactly once.
+	*  Iterates over queue and checks if the cLevel is exactly once. cLevel is conflict level. Checks if the decision level of conflict is excatly once in the queue elements level
 	*/
 	bool isUniqueImp(queue<Node*> q , int cLevel){
-		//cout << "IsUnique Impl \n";
+		cout << "IUI : IsUnique Impl \n";
 		int count = 0;
 		set<Node*> setQ;
 		set<Node*>::iterator it;
 		Node* cur;
-		//cout << "Queue size is " << q.size() <<endl;
+		cout << "IUI : Queue size is " << q.size() <<endl;
 		while(q.size() != 0){
 		//	cout << "check 1 \n";
 			cur = q.front();
-          //  cout << "Cur val is " << cur->lit <<endl;
+            cout << "IUI : Cur lit is " << (cur->lit) << " And is assigned value " << (cur->assigned) <<endl;
 		//	 cout << "setQ size " << setQ.size(); 
 			setQ.insert(cur);
 		//	cout << "inserted in setQ \n"; 
 			 q.pop();
 	      //  cout << " popped \n";
 		}
+		cout << "IUI : Inserted all elements to the set having size " << setQ.size() << endl; 
 		//cout << "check 2 \n";
 		//int secondHighestDec = 0;
 		for (it=setQ.begin(); it!=setQ.end(); ++it)
         {
           // 	cout << "check 3 \n";
 		    int tempD = (*it)->dLevel;
-		  //  if(tempD != cLevel){
-		  //  	if(tempD > secondHighestDec){
-		  //  		secondHighestDec = tempD;
-	//			}
-		//	}
-			if(tempD == cLevel){
+		  	if(tempD == cLevel){
 				count++;
 			}
-           	 
+           	 cout << "IUI : Set current element is " << (*it)->lit << " and has value " << (*it)->assigned << endl;
 	    }
+	    cout << "IUI : iterated over all elements to check the count of nodes at conflict level " << cLevel << " and count is " << count << endl;
 		if(count == 1){
 	//		decToBacktrack = secondHighestDec;
+	       cout << "IUI : Exit Found IUI . \n";
+			return true;
+		}
+		//Verify this below - 
+	//	if(count == setQ.size()){
+			//All nodes in q are at same level . 
+	//		decToBacktrack = 0;
+	//		return true;
+	//	}
+		cout << "IUI : Exit Not Found IUI \n";
+		return false;
+	}
+	bool allAtSameLevel(queue<Node*> q){
+		set<Node*> setQ;
+		set<Node*>::iterator it;
+		Node* cur;
+		while(!q.empty()){
+			cur = q.front();
+			q.pop();
+			setQ.insert(cur);
+		}
+		int count =0;
+		int index = 0;
+		int prevLevel = -1;
+		for (it=setQ.begin(); it!=setQ.end(); ++it){
+          	cur = *it;
+          	
+		    int level = cur->dLevel;
+	     	if(prevLevel==-1){
+			    prevLevel = level;
+			    count++;
+		   }
+		   else{
+	            if(prevLevel == level){
+	               count++;	
+				}		   	
+     	    }
+			index++;
+		}
+		if(count==index){
+			if(prevLevel == 0){
+				decToBacktrack =-1;
+			}
+			else
+			    decToBacktrack =0;
+			    
 			return true;
 		}
 		return false;
@@ -628,53 +934,89 @@ class CDCLSolver {
 	* Gets a queue and performs BFS and checks for unique implication point
 	*/
 	void analyzeAndLearn(){
-		//cout << "Analyze and learn\n";
+		cout << "ALA : Analyze and learn\n";
 		queue<Node*> q;
 		Node* cur ;
+		// We add conflict node to our queue. We can be sure that globConflict is not NULL because we only enter here if there is a conflict. And if there is a conflict we get a reference of the conflict in globConflict . Line number 280 in isUnitCloz 
 		q.push(globConflict);
+		cout << "ALA : pushed conflict Node " << globConflict->lit << " in the queue\n";
+		//decision level of conflict
 		int decConflict = globConflict->dLevel;
-		//cout << "check 1 \n";
+		cout << "ALA : conflict is at decision level " << decConflict << endl;
+		//If the conflict occurs at level zero , it results from singleton and pure literals. So simly return with decToBacktrack =-1
+		if(decConflict == 0){
+			decToBacktrack =-1;
+			return;
+		}
+		set<Node*> bigSet;
+		bigSet.insert(globConflict);
 		while(true){
 		//	cout << "check 2 \n";
 			if(q.empty()){
+				cout << " ALA: Big queue is empty \n";
 				break;
 			}
 			else{
 			 cur = q.front();
-			  q.pop();
+			 q.pop();
+			 cout << " ALA: Popped front. Front of Big queue is " << cur->lit << "Ans is assigned value " << cur->assigned <<endl;
+			 // if the current node is a vertex node , then pop it and push to fron tback.  
+			 if((cur->adjacentFrom).size() == 0){
+			 	  cout << "ALA: it is a vertex element" << cur->lit << " So pushing back on the Big queue \n"; 
+			 	  
+			      q.push(cur);
+			  }
 			}
-		  // cout << "check 3 \n";	
+		  // cout << "check 3 \n";
+		  //get Adjacent nodes to the current Node which have an edge from them to the current node. 	
+		  cout << "ALA : Size of the current node's adjacentFrom (isVertex ? )" << (cur->adjacentFrom).size() << endl;
 		  vector<Node*> adjNodes = cur->adjacentFrom;
 		  for(int i=0;i<adjNodes.size();i++){
+		  	  if(bigSet.count(adjNodes[i])){
+		  	  	continue;
+				}
 			   q.push(adjNodes[i]);
+			   bigSet.insert(adjNodes[i]);
+			   cout << "ALA pushing " << (adjNodes[i])->lit << " on the front of Big queue \n";
 		  }
-		  
+		  //Temporary references/snapshots of the queue that are used in isUniueImplication and learningCloz from the cut.  
 		  queue<Node*> tempQU = q;
 		  queue<Node*> tempQD = q;
+		  queue<Node*> tempQq = q;
+		  //check if all the elements in the queue are vertex node, then break from the loop
+		  //if(allVertex(tempQq)){
+		  //	break;
+		 // }
+		 
 		  //iterate over this cut and check for unique implication point
-		  
+		  //Each iteration represents a cut. So we must check the unique implication point at every iteration and break/return when we find one. 
 		  if(isUniqueImp(tempQU ,decConflict)){
 		  	//Found the cut . So learn the clause and break
 		  	learnClause(tempQD);
-		  	cout << "Decision Level is " << d <<endl;
+		  	cout << "ALA : Decision Level is " << d <<endl;
 		  	learnedCloz->printCloz();
-		  	cout << "Decision level to backtrack to " << decToBacktrack << endl;
+		  	cout << "ALA: Decision level to backtrack to " << decToBacktrack << endl;
 		  	return;
 		  }
+		  
+		  //if(allAtSameLevel(tempQq)){
+		  //      break;	
+		 // }
           //cout << "check 5 \n";
 		}
-		
+		cout << "ALA : Exit ALA \n";
 		
 		//cout << "can reach end \n";
 	}
 		
 	void solveCDCL(){
-	//	cout << "Inside solveDPLL" << endl;
+		cout << "Inside solveCDCL" << endl;
+	    printAssign();
 		time_t start ;
 		time_t end;
 		start = time(NULL) ;
 		end = time(NULL);
-		while (end - start < 30){
+		while (end - start < 30000){
 			end = time(NULL);
 			unitPropagateCDCL();
 			if(assignment.count(-1)==0){
@@ -692,8 +1034,7 @@ class CDCLSolver {
 			else{
 				//there is conflict
 				analyzeAndLearn();
-				break;
-				/*
+				
 				if(decToBacktrack < 0){
 					cout << "UNSAT";
 					return;
@@ -701,7 +1042,7 @@ class CDCLSolver {
 				 else{
 				 	currForm.push_back(learnedCloz);
 					backtrack();
-				}*/
+				}
 			}
 		}
 		//cout << "TIMEOUT \n"; 

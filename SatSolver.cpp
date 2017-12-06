@@ -30,9 +30,10 @@ vector<string> split(string str,string sep){
 * Parses the file and reads the clauses line by line and runs the SAT Solver
 * C:\\study\\4th quarter\\cse 291 E\\petite\\sat-benchmarks-master\\done\\
 * C:\\study\\4th quarter\\sat solver\\resource\\dimacs3.sat
+* C:\\study\\4th quarter\\cse 291 E\\petite\\sat-benchmarks-master\\done\\total-order-alt-19.cnf
 **/
 int main(){
-	string filePath = "C:\\study\\4th quarter\\cse 291 E\\petite\\sat-benchmarks-master\\done\\total-order-alt-19.cnf";
+	string filePath = "C:\\study\\4th quarter\\cse 291 E\\petite\\sat-benchmarks-master\\done\\graph-ordering-6.cnf";
 	ifstream infile(filePath.c_str());
     string line;
     int nvar = 0;
@@ -71,6 +72,7 @@ if(type != "cnf" && type != "CNF"){
 	cout << type << " not implemented \n ";
 	infile.close();
     exit(-1);
+    
 }
 
 infile.close();

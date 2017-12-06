@@ -17,7 +17,7 @@ class Node{
 		Node(int level, int literal, bool assignment){
 			dLevel = level;
 			lit = literal;
-			assignment = assigned;
+			assigned = assignment;
 		}
 		
 	
