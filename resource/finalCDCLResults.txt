@@ -1,0 +1,17 @@
+total order
+2 - 13 = UNSAT
+
+graph ordering alt
+2-19 = SAT
+
+total order alt
+2-19 = SAT
+
+order-principle-alt
+2 -19 = SAT
+
+graph ordering
+2-9 UNSAt
+
+
+1. Do you remove assignments of variables in backtrack if they have been learned from a learnedCloz ? 10 7 4 ... 
