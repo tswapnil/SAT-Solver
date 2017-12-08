@@ -38,19 +38,27 @@ CDCLSolver* solver;
 **/
 
 sig_atomic_t sigflag = 0;
-	
+int verbose = 0;	
 void sighandler(int s)
 {     
       std::cerr << "Unknown " << ".\n"; // this is undefined behaviour
-      solver->printStack();
+      if(verbose){
+	     solver->printStack();
+	  }
 	  exit(1);
       sigflag = 1; // something like that
 }
 
 int main(int argc, char *argv[]){
 	string filePath = "C:\\study\\4th quarter\\sat solver\\resource\\dimacs3.sat";
-	int timeout = 30;
-	bool verbose = false;
+	int timeout = 300;
+	
+	if(argc == 1){
+		cout << "Please provide input file name \n";
+		cout << "Correct order - SatSolver.exe filePath Timeout Verbose \n";
+		cout << " Ex: SatSolver.exe \"C:\\filename.sat\" or SatSolver.exe \"C:\\filename.sat\" 300 or SatSolver.exe \"C:\\filename.sat\" 300 0" << endl;
+		exit(1);
+	}
 	if(argc == 2){
 	  filePath = argv[1];	
 	}
@@ -61,11 +69,12 @@ int main(int argc, char *argv[]){
 	if(argc == 4){
 		filePath = argv[1];
 		timeout = atoi(argv[2]);
-		verbose = (bool)argv[3];
+		verbose = atoi(argv[3]);
 	}
-	cout << "argc is " <<  argc <<endl;
-	cout << "File path is " << filePath<<endl;
-	cout << "Time out is " << timeout<<endl;
+	//cout << "argc is " <<  argc <<endl;
+	//cout << "File path is " << filePath<<endl;
+	//cout << "Time out is " << timeout<<endl;
+	//cout << " Verbose is " << verbose <<endl;
 	std::signal(SIGINT, sighandler);  
 	
 	ifstream infile(filePath.c_str());
@@ -116,7 +125,7 @@ infile.close();
 //DPLLSolver* solver = new DPLLSolver(vecClozes,nvar);
 //solver->solveDPLL(); 
 
-solver = new CDCLSolver(vecClozes,nvar,timeout,verbose);
+solver = new CDCLSolver(vecClozes,nvar,timeout,verbose!=0);
 solver->solveCDCL();
 
  

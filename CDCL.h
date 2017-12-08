@@ -1213,7 +1213,7 @@ class CDCLSolver {
 				}
 			}
 		}
-		cout << "UNKNOWN : TO \n";
+		cout << "UNKNOWN \n";
 		if(verbose){
 			printStack();
 		} 
